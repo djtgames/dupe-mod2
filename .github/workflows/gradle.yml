@@ -1,20 +1,32 @@
-name: Compiling
+name: Build Fabric Mod
 
 on:
   push:
+    branches:
+      - main  # Change this to your default branch
   pull_request:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - name: Compile
-      uses: Ruochenfu2011/compilation@v1
-      
-    - name: Archive Artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: Artifacts
-        path: ./build/libs
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'  # Use the version your mod is built with
+          distribution: 'adopt'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build with Gradle
+        run: ./gradlew build
